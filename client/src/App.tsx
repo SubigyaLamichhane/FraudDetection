@@ -29,7 +29,7 @@ function App() {
 
   const predict = async () => {
     console.log(formValues);
-    const response = await axios.post('http://localhost:5000/', {
+    const response = await axios.post(API_URL, {
       typeOfPayment: formValues.typeOfPayment,
       amount: formValues.amount,
       oldbalanceOrg: formValues.oldbalanceOrg,
