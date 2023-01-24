@@ -24,11 +24,19 @@ function App() {
   ];
 
   const onInputChange = (event: any, key: string) => {
+    setMessage('');
     setFormValues({ ...formValues, [key]: event.target.value });
   };
 
   const predict = async () => {
-    console.log(formValues);
+    if (
+      !formValues.amount ||
+      !formValues.oldbalanceOrg ||
+      !formValues.newbalanceOrg
+    ) {
+      setMessage('Please fill all the fields');
+      return;
+    }
     const response = await axios.post(API_URL, {
       typeOfPayment: formValues.typeOfPayment,
       amount: formValues.amount,
@@ -36,9 +44,9 @@ function App() {
       newbalanceOrg: formValues.newbalanceOrg,
     });
     if (response.data.isFraud) {
-      setMessage('The transaction is predicted to be fraudulent');
+      setMessage('Fraud');
     } else {
-      setMessage('The transaction is predicted to be not fraudulent');
+      setMessage('Not Fraud');
     }
   };
 
