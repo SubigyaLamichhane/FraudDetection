@@ -1,12 +1,16 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import reactLogo from './assets/react.svg';
 import './App.css';
 import axios from 'axios';
-import { API_URL } from './apiURL';
-import Modal from './Modal';
+import { API_URL } from './constants/apiURL';
+import Modal from './components/Modal';
+import Excel from './components/Excel';
+import { predictFraudOrNot } from './utils/predictFraudOrNot';
 
 function App() {
   const [count, setCount] = useState(0);
+  const [garbage, setGarbage] = useState(0);
+  const [data, setData] = useState([]);
   const [formValues, setFormValues] = useState({
     typeOfPayment: 1,
     amount: '',
@@ -23,6 +27,10 @@ function App() {
     { name: 'DEBIT', value: 5 },
   ];
 
+  useEffect(() => {
+    const response = axios.get(API_URL).then((res) => setGarbage(1));
+  }, []);
+
   const onInputChange = (event: any, key: string) => {
     setMessage('');
     setFormValues({ ...formValues, [key]: event.target.value });
@@ -37,13 +45,8 @@ function App() {
       setMessage('Please fill all the fields');
       return;
     }
-    const response = await axios.post(API_URL, {
-      typeOfPayment: formValues.typeOfPayment,
-      amount: formValues.amount,
-      oldbalanceOrg: formValues.oldbalanceOrg,
-      newbalanceOrg: formValues.newbalanceOrg,
-    });
-    if (response.data.isFraud) {
+    const response = await predictFraudOrNot(formValues);
+    if (response) {
       setMessage('Fraud');
     } else {
       setMessage('Not Fraud');
@@ -52,9 +55,10 @@ function App() {
 
   return (
     <div className="App">
-      <h1>Online Payment Fraud Prediction</h1>
+      <h1 className="mb-4">Online Payment Fraud Prediction</h1>
+      <Excel data={data} setData={setData} types={types} />
       <div className="card">
-        <p className="mt-4">Payment Type</p>
+        <p className="">Payment Type</p>
         <select
           value={formValues.typeOfPayment}
           onChange={(event) => {
@@ -99,6 +103,7 @@ function App() {
           </a>
         </span>
       </p>
+      <p className="hidden">{garbage}</p>
     </div>
   );
 }
